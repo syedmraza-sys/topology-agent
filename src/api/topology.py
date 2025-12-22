@@ -151,8 +151,10 @@ async def topology_query(
     # Invoke the LangGraph graph; support both async and sync flavors.
     try:
         if hasattr(graph_app, "ainvoke"):
+            print("LOG: Using async graph_app")
             result_state = await graph_app.ainvoke(initial_state)  # type: ignore[attr-defined]
         else:
+            print("LOG: Using sync graph_app")
             result_state = graph_app.invoke(initial_state)  # type: ignore[call-arg]
     except Exception as exc:
         logger.error(

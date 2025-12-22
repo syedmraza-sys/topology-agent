@@ -63,6 +63,24 @@ class Settings(BaseSettings):
         description="Async SQLAlchemy URL, e.g. postgresql+asyncpg://user:pass@host/db",
     )
 
+    # Graph DB (topology)
+    graph_db_uri: str | None = Field(
+        default=None,
+        description="Graph DB URI (e.g. neo4j://host:7687). If not set, topology graph calls are disabled.",
+    )
+    graph_db_user: str | None = Field(
+        default=None,
+        description="Graph DB username (Neo4j or similar).",
+    )
+    graph_db_password: str | None = Field(
+        default=None,
+        description="Graph DB password.",
+    )
+    graph_db_encrypted: bool = Field(
+        default=False,
+        description="Whether to use encrypted connection to graph DB.",
+    )
+
     # Cache / Redis
     redis_url: str | None = Field(
         default=None,

@@ -61,9 +61,6 @@ class GraphClient:
     ) -> List[Dict[str, Any]]:
         """
         Run a Cypher query and return the result as a list of dicts.
-
-        This is a generic primitive that the topology_tool can build on
-        (e.g., get paths between two sites, fetch neighbors, etc.).
         """
         if self._driver is None:
             raise RuntimeError("GraphClient driver is not initialized.")
@@ -71,5 +68,4 @@ class GraphClient:
         async with self._driver.session() as session:  # type: ignore[union-attr]
             result = await session.run(query, parameters or {})
             records = await result.data()
-            # `data()` from neo4j returns a list of dict-like records already
             return [dict(r) for r in records]

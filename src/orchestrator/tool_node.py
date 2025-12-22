@@ -20,6 +20,9 @@ async def tool_node(state: TopologyState) -> TopologyState:
       - read state["plan"]["steps"] and selectively call tools
       - add parallelism or more complex scheduling.
     """
+    
+    print("LOG: Running tool_node")
+
     # Topology
     state["topology_data"] = await run_topology_tool(state)
 

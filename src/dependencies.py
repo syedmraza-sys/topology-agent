@@ -15,6 +15,7 @@ from sqlalchemy.ext.asyncio import (
 
 from .config import Settings, get_settings
 from .logging_config import setup_logging
+from .db.graph_client import GraphClient  # NEW
 
 # LangGraph compiled graph type; orchestrator.workflow.build_workflow will come later.
 try:
@@ -27,8 +28,8 @@ except Exception:  # pragma: no cover
 _engine: AsyncEngine | None = None
 _SessionLocal: async_sessionmaker[AsyncSession] | None = None
 _redis_client: redis.Redis | None = None
-_graph_app: CompiledGraph | None = None
-
+_graph_app: CompiledGraph | None = None # LangGraph compiled graph
+_graph_client: GraphClient | None = None  # NEW; Graph DB client
 
 async def init_resources() -> None:
     """
@@ -69,6 +70,29 @@ async def init_resources() -> None:
         _redis_client = None
         log.info("redis_disabled")
 
+    # Graph DB client (optional)
+    global _graph_client
+    if settings.graph_db_uri and settings.graph_db_user and settings.graph_db_password:
+        try:
+            _graph_client = await GraphClient.from_neo4j(
+                uri=settings.graph_db_uri,
+                user=settings.graph_db_user,
+                password=settings.graph_db_password,
+                encrypted=settings.graph_db_encrypted,
+            )
+            log.info("graph_client_initialized", uri=settings.graph_db_uri)
+        except Exception as exc:  # pragma: no cover
+            _graph_client = None
+            log.warning(
+                "graph_client_init_failed",
+                uri=settings.graph_db_uri,
+                error=str(exc),
+            )
+    else:
+        _graph_client = None
+        log.info("graph_client_disabled")
+
+   
     # LangGraph graph: import lazily to avoid circular imports
     try:
         from .orchestrator.workflow import build_workflow  # type: ignore
@@ -99,6 +123,13 @@ async def close_resources() -> None:
     if _redis_client is not None:
         await _redis_client.close()
         log.info("redis_closed")
+
+    # Graph client
+    global _graph_client
+    if _graph_client is not None:
+        await _graph_client.close()
+        log.info("graph_client_closed")
+        _graph_client = None
 
     # graph_app typically doesn't require explicit cleanup.
 
@@ -155,3 +186,13 @@ def get_context_logger(settings: Settings = Depends(get_settings_dep)) -> struct
     """
     logger = structlog.get_logger("service")
     return logger.bind(env=settings.env, app=settings.app_name)
+
+def get_graph_client() -> GraphClient | None:
+    """
+    Accessor for the global GraphClient.
+
+    Can return None if graph DB is not configured or failed at startup.
+    Orchestrator tools should handle the None case gracefully (e.g., mark
+    responses as partial).
+    """
+    return _graph_client

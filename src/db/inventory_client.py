@@ -37,14 +37,22 @@ async def get_circuits_by_sites(
             status,
             metadata
         FROM inventory_circuits
-        WHERE src_site = :src_site
-          AND dst_site = :dst_site
+        WHERE src_site in (SELECT id FROM inventory_sites WHERE name = :src_site)
+          AND dst_site in (SELECT id FROM inventory_sites WHERE name = :dst_site)
           {layer_clause}
         LIMIT :limit
         """
         .format(layer_clause="AND layer = :layer" if layer else "")
     )
 
+    print("LOG: Running SQL query:", query)
+    print("LOG: With params:", {
+        "src_site": src_site,
+        "dst_site": dst_site,
+        "layer": layer,
+        "limit": limit,
+    })
+    
     params: Dict[str, Any] = {
         "src_site": src_site,
         "dst_site": dst_site,

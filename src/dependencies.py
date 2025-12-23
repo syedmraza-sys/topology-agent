@@ -152,6 +152,17 @@ async def get_db_session() -> AsyncGenerator[AsyncSession, None]:
         yield session
 
 
+def get_session_maker() -> async_sessionmaker[AsyncSession]:
+    """
+    Expose the AsyncSession factory so orchestrator tools can open
+    their own sessions outside of FastAPI dependency injection.
+    """
+    if _SessionLocal is None:
+        raise RuntimeError("Database session factory not initialized. Did you call init_resources()?")
+
+    return _SessionLocal
+
+
 def get_redis_client() -> redis.Redis | None:
     """
     FastAPI dependency for Redis client (can be None if disabled).

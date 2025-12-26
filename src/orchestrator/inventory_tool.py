@@ -54,7 +54,7 @@ async def run_inventory_tool(state: TopologyState) -> Dict[str, Any]:
             limit=500,
         )
 
-        print("LOG: Circuits:", circuits)
+       # print("DEBUG: Circuits:", circuits)
 
         # Optionally fetch full site records for the endpoints (and maybe others)
         site_ids = {src_site, dst_site}

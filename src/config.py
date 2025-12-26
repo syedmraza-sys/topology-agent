@@ -94,14 +94,42 @@ class Settings(BaseSettings):
     )
 
     # LLM backend selection
-    llm_backend: Literal["bedrock", "vertex", "openai", "vllm"] = Field(
-        "bedrock",
-        description="Default LLM backend to use for Chat models.",
+    # llm_backend: Literal["bedrock", "vertex", "openai", "vllm"] = Field(
+    #    "bedrock",
+    #    description="Default LLM backend to use for Chat models.",
+    #)
+
+    llm_backend: Literal["bedrock", "vertex", "openai", "vllm", "llamacpp"] = Field(
+        default="openai",
+        description="Which LLM backend to use for planner/response/validator.",
     )
+
     embedding_backend: Literal["bedrock", "vertex", "openai", "vllm", "huggingface"] | None = Field(
         default=None,
         description="Backend for embeddings. If None, uses llm_backend.",
     )
+
+    # llama.cpp / local GGUF models (e.g. mistral-7b-instruct-v0.2.Q4_K_M.gguf)
+    llama_model_path: str | None = Field(
+        default=None,
+        description=(
+            "Path to local GGUF model file for llama.cpp, e.g. "
+            "/models/mistral-7b-instruct-v0.2.Q4_K_M.gguf"
+        ),
+    )
+    llama_n_ctx: int = Field(
+        default=4096,
+        description="Context window (n_ctx) for llama.cpp models.",
+    )
+    llama_n_gpu_layers: int = Field(
+        default=0,
+        description="Number of layers to offload to GPU (-1 = all, 0 = CPU only).",
+    )
+    llama_n_threads: int = Field(
+        default=4,
+        description="Number of CPU threads to use for llama.cpp.",
+    )
+
 
     # Optional: LangSmith
     langsmith_api_key: str | None = Field(

@@ -18,27 +18,27 @@ Your job is to:
 You do NOT execute tools yourself. You only create a plan that an executor will follow.
 
 Output format (MUST be valid JSON):
-{
+{{
   "strategy": "<short description>",
   "steps": [
-    {
+    {{
       "id": "step_1",
       "tool": "topology_tool",
-      "params": { ... },
+      "params": {{ ... }},
       "depends_on": []
-    },
-    {
+    }},
+    {{
       "id": "step_2",
       "tool": "inventory_tool",
-      "params": { ... },
+      "params": {{ ... }},
       "depends_on": ["step_1"]
-    }
+    }}
   ],
-  "metadata": {
+  "metadata": {{
     "requires_strict_completeness": true/false,
     "notes": "..."
-  }
-}
+  }}
+}}
 """
 
 PLANNER_USER_TEMPLATE = """User question:
@@ -58,6 +58,8 @@ Previous plan (if any, JSON):
 
 Validation feedback (if any, JSON):
 {validation_feedback}
+
+IMPORTANT: Return ONLY valid JSON. No conversational text.
 """
 
 

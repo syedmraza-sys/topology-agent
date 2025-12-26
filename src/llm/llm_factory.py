@@ -39,6 +39,13 @@ except Exception:  # pragma: no cover
     ChatVertexAI = None  # type: ignore
     VertexAIEmbeddings = None  # type: ignore
 
+# llama.cpp chat model (local GGUF)
+try:
+    from langchain_community.chat_models import ChatLlamaCpp  # type: ignore
+except Exception:  # pragma: no cover
+    ChatLlamaCpp = None  # type: ignore
+
+
 # HuggingFace (Local)
 try:
     from langchain_huggingface import HuggingFaceEmbeddings  # type: ignore
@@ -97,6 +104,36 @@ def _create_vllm_chat(model: str, *, temperature: float) -> BaseChatModel:
         )
     # The OpenAI-compatible base URL must be set via environment variables.
     return ChatOpenAI(model=model, temperature=temperature)
+
+def _create_llamacpp_chat(
+    settings: Settings,
+    *,
+    temperature: float,
+) -> BaseChatModel:
+    """
+    Create a ChatLlamaCpp model using a local GGUF file, e.g.
+    mistral-7b-instruct-v0.2.Q4_K_M.gguf
+    """
+    if ChatLlamaCpp is None:
+        raise RuntimeError(
+            "ChatLlamaCpp is not available. Install `llama-cpp-python` "
+            "and `langchain-community` to use the llama.cpp backend."
+        )
+
+    if not settings.llama_model_path:
+        raise RuntimeError(
+            "llama_model_path is not configured. "
+            "Set TOPOLOGY_AGENT_LLAMA_MODEL_PATH to your GGUF file path."
+        )
+
+    return ChatLlamaCpp(
+        model_path=settings.llama_model_path,
+        temperature=temperature,
+        n_ctx=settings.llama_n_ctx,
+        n_gpu_layers=settings.llama_n_gpu_layers,
+        n_threads=settings.llama_n_threads,
+        verbose=False,
+    )
 
 
 # --------------------------------------------------------------------------- #
@@ -175,9 +212,11 @@ def get_comment_embedding_model(settings: Settings | None = None) -> Any:
 # --------------------------------------------------------------------------- #
 
 
-def _get_backend(settings: Settings) -> Literal["bedrock", "vertex", "openai", "vllm"]:
-    return settings.llm_backend
+#def _get_backend(settings: Settings) -> Literal["bedrock", "vertex", "openai", "vllm"]:
+#    return settings.llm_backend
 
+def _get_backend(settings: Settings) -> Literal["bedrock", "vertex", "openai", "vllm", "llamacpp"]:
+    return settings.llm_backend
 
 def get_planner_model(settings: Settings | None = None) -> BaseChatModel:
     """
@@ -208,6 +247,10 @@ def get_planner_model(settings: Settings | None = None) -> BaseChatModel:
         # Example local vLLM model name
         return _create_vllm_chat(model="local-gpt-4o-equivalent", temperature=0.2)
 
+    if backend == "llamacpp":
+        # Mistral-7B-Instruct via llama.cpp
+        return _create_llamacpp_chat(settings, temperature=0.2)
+    
     raise ValueError(f"Unsupported llm_backend: {backend}")
 
 
@@ -236,6 +279,9 @@ def get_validator_model(settings: Settings | None = None) -> BaseChatModel:
     if backend == "vllm":
         return _create_vllm_chat(model="local-judge-model", temperature=0.0)
 
+    if backend == "llamacpp":
+        return _create_llamacpp_chat(settings, temperature=0.0)
+
     raise ValueError(f"Unsupported llm_backend: {backend}")
 
 
@@ -263,6 +309,9 @@ def get_response_model(settings: Settings | None = None) -> BaseChatModel:
         )
     if backend == "vllm":
         return _create_vllm_chat(model="local-response-model", temperature=0.3)
+
+    if backend == "llamacpp":
+        return _create_llamacpp_chat(settings, temperature=0.3)
 
     raise ValueError(f"Unsupported llm_backend: {backend}")
 

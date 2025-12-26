@@ -22,21 +22,21 @@ async def run_topology_tool(state: TopologyState) -> Dict[str, Any]:
     Adapt the Cypher query to your real graph schema later.
     """
     
-    print("LOG: Inside topology_tool")
+    # print("LOG: Inside topology_tool")
     user_input = state.get("user_input", "")
     ui_context: Dict[str, Any] = state.get("ui_context", {}) or {}
 
     selected_sites: List[str] = ui_context.get("selected_sites") or []
     layer: str = ui_context.get("layer") or "L2"
 
-    print("LOG: Selected sites:", selected_sites)
-    print("LOG: Layer:", layer) 
-    print("LOG: User input:", user_input)
+    # print("LOG: Selected sites:", selected_sites)
+    # print("LOG: Layer:", layer) 
+    # print("LOG: User input:", user_input)
     graph_client = get_graph_client()
 
     # If no graph DB or not enough info, return stub.
     if graph_client is None or len(selected_sites) < 2:
-        print("LOG: Returning stub")
+       # print("LOG: Returning stub")
         return {
             "paths": [],
             "metadata": {
@@ -57,11 +57,11 @@ async def run_topology_tool(state: TopologyState) -> Dict[str, Any]:
     RETURN [n IN nodes(p) | n.id] AS hops
     """
 
-    print("LOG:Running cypher query:", cypher)
-    print("LOG: With params:", {
-        "src_site": src_site,
-        "dst_site": dst_site,
-    })  
+   # print("DEBUG:Running cypher query:", cypher)
+   # print("DEBUG: With params:", {
+   #     "src_site": src_site,
+   #     "dst_site": dst_site,
+   # })  
 
     try:
         records = await graph_client.run_cypher(
@@ -73,7 +73,7 @@ async def run_topology_tool(state: TopologyState) -> Dict[str, Any]:
         )
     except Exception as exc:
         # On error, fall back to stub but indicate degradation.
-        print("LOG: Graph client error:", exc)
+        print("DEBUG: Graph client error:", exc)
         return {
             "paths": [],
             "metadata": {
@@ -97,7 +97,7 @@ async def run_topology_tool(state: TopologyState) -> Dict[str, Any]:
             }
         )
 
-    print("LOG: Paths:", paths)
+    # print("DEBUG: Paths:", paths)
 
     return {
         "paths": paths,

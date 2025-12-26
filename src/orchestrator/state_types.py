@@ -26,7 +26,9 @@ class TopologyState(TypedDict, total=False):
     # === Planner output ===
     # For now, this is a loose dict; you can tighten it later with Pydantic models.
     plan: Dict[str, Any]
-
+    plan_raw: str                        # raw LLM text output (for debugging)
+    planning_error: Optional[str]        # error message if parsing failed
+    
     # === Tool results ===
     topology_data: Dict[str, Any]
     inventory_data: Dict[str, Any]

@@ -33,7 +33,7 @@ async def run_comment_tool(state: TopologyState) -> Dict[str, Any]:
     user_input: str = state.get("user_input", "") or ""
     ui_context: Dict[str, Any] = state.get("ui_context", {}) or {}
 
-    print(f"DEBUG: comment_tool input='{user_input}'")
+    # print(f"DEBUG: comment_tool input='{user_input}'")
 
     if not user_input.strip():
         print("DEBUG: comment_tool skipping due to empty input")
@@ -55,12 +55,14 @@ async def run_comment_tool(state: TopologyState) -> Dict[str, Any]:
 
     embed_model = get_comment_embedding_model(settings)
     
-    print(f"DEBUG: comment_tool embedding text='{search_text}' with model={type(embed_model)}")
+    # print(f"DEBUG: comment_tool embedding text='{search_text}' with model={type(embed_model)}")
+    
     # LangChain embeddings are typically synchronous; we call them directly.
     # In a highly concurrent environment you may want to offload this to a
     # thread pool or a worker.
     embedding: List[float] = embed_model.embed_query(search_text)
-    print(f"DEBUG: comment_tool generated embedding len={len(embedding)}")
+    
+    # print(f"DEBUG: comment_tool generated embedding len={len(embedding)}")
 
     # --- 3) Search pgvector ----------------------------------------------
 
@@ -86,7 +88,7 @@ async def run_comment_tool(state: TopologyState) -> Dict[str, Any]:
             }
         )
 
-    print(f"DEBUG: comment_tool comments={comments}")
+    # print(f"DEBUG: comment_tool comments={comments}")
 
     return {
         "comments": comments,

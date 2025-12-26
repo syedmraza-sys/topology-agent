@@ -97,8 +97,8 @@ async def search_chat_embeddings(
         LIMIT :limit
         """
     )
-    print("LOG: Running Vector Chat Search:", query)
-    print("LOG: Chat Params:", params)
+    # print("LOG: Running Vector Chat Search:", query)
+    # print("LOG: Chat Params:", params)
     
     result = await session.execute(query, params)
     rows = result.mappings().all()
@@ -171,7 +171,7 @@ async def search_comment_embeddings(
         """
     )
 
-    print("LOG: Running Vector Comment Search:", query)
+    # print("LOG: Running Vector Comment Search:", query)
 
     result = await session.execute(
         query,
@@ -181,5 +181,5 @@ async def search_comment_embeddings(
         },
     )
     rows = result.mappings().all()
-    print("LOG: Vector Comment Search Results:", rows) 
+    # print("LOG: Vector Comment Search Results:", rows) 
     return [dict(row) for row in rows]

@@ -1,0 +1,101 @@
+id,text,ticket_id,author
+CMT-1001,Warning: Router at POP-South is reporting High latency observed. Ticket auto-generated.,TKT-5001,system_monitor_2@netops.com
+CMT-1002,Warning: FiberLink at POP-North is reporting Fan failure. Ticket auto-generated.,TKT-5002,system_monitor_5@netops.com
+CMT-1003,Maintenance alert: Switch in POP-South scheduled for reboot due to Packet loss > 1%.,TKT-5003,system_monitor_2@netops.com
+CMT-1004,Critical: Interface flapping on FiberLink (HQ-Basement). Immediate attention required.,TKT-5004,system_monitor_1@netops.com
+CMT-1005,Warning: Firewall at POP-South is reporting BGP neighbor down. Ticket auto-generated.,TKT-5005,system_monitor_2@netops.com
+CMT-1006,Maintenance alert: Router in POP-South scheduled for reboot due to Optical signal low.,TKT-5006,system_monitor_3@netops.com
+CMT-1007,Warning: FiberLink at Cloud-Region-East is reporting CRC errors increasing. Ticket auto-generated.,TKT-5007,system_monitor_5@netops.com
+CMT-1008,Critical: Optical signal low on Router (HQ-Basement). Immediate attention required.,TKT-5008,system_monitor_5@netops.com
+CMT-1009,Maintenance alert: PowerSupply in Cloud-Region-East scheduled for reboot due to Optical signal low.,TKT-5009,system_monitor_4@netops.com
+CMT-1010,Warning: Switch at Cloud-Region-East is reporting Memory allocation failure. Ticket auto-generated.,TKT-5010,system_monitor_1@netops.com
+CMT-1011,Warning: FiberLink at HQ-Basement is reporting High latency observed. Ticket auto-generated.,TKT-5011,system_monitor_3@netops.com
+CMT-1012,Maintenance alert: FiberLink in POP-North scheduled for reboot due to Optical signal low.,TKT-5012,system_monitor_4@netops.com
+CMT-1013,Warning: Router at POP-North is reporting High latency observed. Ticket auto-generated.,TKT-5013,system_monitor_1@netops.com
+CMT-1014,Warning: PowerSupply at DataCenter-A is reporting Overheating detected. Ticket auto-generated.,TKT-5014,system_monitor_1@netops.com
+CMT-1015,Maintenance alert: Switch in DataCenter-A scheduled for reboot due to High latency observed.,TKT-5015,system_monitor_3@netops.com
+CMT-1016,Critical: CRC errors increasing on Firewall (HQ-Basement). Immediate attention required.,TKT-5016,system_monitor_5@netops.com
+CMT-1017,Warning: FiberLink at Cloud-Region-East is reporting Fan failure. Ticket auto-generated.,TKT-5017,system_monitor_1@netops.com
+CMT-1018,Maintenance alert: LoadBalancer in POP-North scheduled for reboot due to High latency observed.,TKT-5018,system_monitor_1@netops.com
+CMT-1019,Warning: LoadBalancer at POP-South is reporting Packet loss > 1%. Ticket auto-generated.,TKT-5019,system_monitor_3@netops.com
+CMT-1020,Critical: CRC errors increasing on FiberLink (HQ-Basement). Immediate attention required.,TKT-5020,system_monitor_2@netops.com
+CMT-1021,Maintenance alert: FiberLink in HQ-Basement scheduled for reboot due to Fan failure.,TKT-5021,system_monitor_3@netops.com
+CMT-1022,Warning: LoadBalancer at DataCenter-A is reporting OSPF state stuck. Ticket auto-generated.,TKT-5022,system_monitor_1@netops.com
+CMT-1023,Warning: FiberLink at Cloud-Region-East is reporting CRC errors increasing. Ticket auto-generated.,TKT-5023,system_monitor_5@netops.com
+CMT-1024,Maintenance alert: LoadBalancer in POP-South scheduled for reboot due to Packet loss > 1%.,TKT-5024,system_monitor_1@netops.com
+CMT-1025,Warning: Firewall at POP-South is reporting Interface flapping. Ticket auto-generated.,TKT-5025,system_monitor_3@netops.com
+CMT-1026,Warning: Firewall at POP-North is reporting OSPF state stuck. Ticket auto-generated.,TKT-5026,system_monitor_5@netops.com
+CMT-1027,Maintenance alert: PowerSupply in HQ-Basement scheduled for reboot due to Fan failure.,TKT-5027,system_monitor_1@netops.com
+CMT-1028,Critical: Optical signal low on Firewall (POP-South). Immediate attention required.,TKT-5028,system_monitor_3@netops.com
+CMT-1029,Warning: Router at Cloud-Region-East is reporting CRC errors increasing. Ticket auto-generated.,TKT-5029,system_monitor_4@netops.com
+CMT-1030,Maintenance alert: Switch in POP-South scheduled for reboot due to Memory allocation failure.,TKT-5030,system_monitor_3@netops.com
+CMT-1031,Warning: Firewall at DataCenter-A is reporting Memory allocation failure. Ticket auto-generated.,TKT-5031,system_monitor_2@netops.com
+CMT-1032,Critical: CRC errors increasing on Router (HQ-Basement). Immediate attention required.,TKT-5032,system_monitor_3@netops.com
+CMT-1033,Maintenance alert: PowerSupply in POP-North scheduled for reboot due to High latency observed.,TKT-5033,system_monitor_3@netops.com
+CMT-1034,Warning: Switch at Cloud-Region-East is reporting High latency observed. Ticket auto-generated.,TKT-5034,system_monitor_5@netops.com
+CMT-1035,Warning: Router at POP-South is reporting Fan failure. Ticket auto-generated.,TKT-5035,system_monitor_4@netops.com
+CMT-1036,Maintenance alert: Switch in DataCenter-A scheduled for reboot due to CRC errors increasing.,TKT-5036,system_monitor_2@netops.com
+CMT-1037,Warning: PowerSupply at Cloud-Region-East is reporting Overheating detected. Ticket auto-generated.,TKT-5037,system_monitor_2@netops.com
+CMT-1038,Warning: Router at DataCenter-A is reporting Fan failure. Ticket auto-generated.,TKT-5038,system_monitor_4@netops.com
+CMT-1039,Maintenance alert: Switch in POP-North scheduled for reboot due to Fan failure.,TKT-5039,system_monitor_4@netops.com
+CMT-1040,Critical: Interface flapping on FiberLink (Cloud-Region-East). Immediate attention required.,TKT-5040,system_monitor_4@netops.com
+CMT-1041,Warning: FiberLink at Cloud-Region-East is reporting Interface flapping. Ticket auto-generated.,TKT-5041,system_monitor_4@netops.com
+CMT-1042,Maintenance alert: Firewall in Cloud-Region-East scheduled for reboot due to Overheating detected.,TKT-5042,system_monitor_4@netops.com
+CMT-1043,Warning: Firewall at HQ-Basement is reporting Fan failure. Ticket auto-generated.,TKT-5043,system_monitor_5@netops.com
+CMT-1044,Critical: BGP neighbor down on Firewall (POP-South). Immediate attention required.,TKT-5044,system_monitor_2@netops.com
+CMT-1045,Maintenance alert: Switch in POP-South scheduled for reboot due to BGP neighbor down.,TKT-5045,system_monitor_3@netops.com
+CMT-1046,Warning: Router at DataCenter-A is reporting Optical signal low. Ticket auto-generated.,TKT-5046,system_monitor_4@netops.com
+CMT-1047,Warning: Firewall at Cloud-Region-East is reporting Interface flapping. Ticket auto-generated.,TKT-5047,system_monitor_4@netops.com
+CMT-1048,Maintenance alert: Firewall in Cloud-Region-East scheduled for reboot due to CRC errors increasing.,TKT-5048,system_monitor_5@netops.com
+CMT-1049,Warning: PowerSupply at Cloud-Region-East is reporting Optical signal low. Ticket auto-generated.,TKT-5049,system_monitor_3@netops.com
+CMT-1050,Warning: Router at POP-North is reporting Memory allocation failure. Ticket auto-generated.,TKT-5050,system_monitor_3@netops.com
+CMT-1051,Maintenance alert: FiberLink in POP-North scheduled for reboot due to Packet loss > 1%.,TKT-5051,system_monitor_2@netops.com
+CMT-1052,Critical: Overheating detected on Firewall (HQ-Basement). Immediate attention required.,TKT-5052,system_monitor_5@netops.com
+CMT-1053,Warning: Firewall at DataCenter-A is reporting Fan failure. Ticket auto-generated.,TKT-5053,system_monitor_2@netops.com
+CMT-1054,Maintenance alert: FiberLink in POP-South scheduled for reboot due to OSPF state stuck.,TKT-5054,system_monitor_1@netops.com
+CMT-1055,Warning: LoadBalancer at HQ-Basement is reporting BGP neighbor down. Ticket auto-generated.,TKT-5055,system_monitor_4@netops.com
+CMT-1056,Critical: OSPF state stuck on Router (HQ-Basement). Immediate attention required.,TKT-5056,system_monitor_3@netops.com
+CMT-1057,Maintenance alert: Firewall in DataCenter-A scheduled for reboot due to Interface flapping.,TKT-5057,system_monitor_1@netops.com
+CMT-1058,Warning: LoadBalancer at Cloud-Region-East is reporting Overheating detected. Ticket auto-generated.,TKT-5058,system_monitor_5@netops.com
+CMT-1059,Warning: FiberLink at HQ-Basement is reporting Memory allocation failure. Ticket auto-generated.,TKT-5059,system_monitor_2@netops.com
+CMT-1060,Maintenance alert: PowerSupply in HQ-Basement scheduled for reboot due to Fan failure.,TKT-5060,system_monitor_5@netops.com
+CMT-1061,Warning: FiberLink at DataCenter-A is reporting CRC errors increasing. Ticket auto-generated.,TKT-5061,system_monitor_4@netops.com
+CMT-1062,Warning: PowerSupply at HQ-Basement is reporting Packet loss > 1%. Ticket auto-generated.,TKT-5062,system_monitor_1@netops.com
+CMT-1063,Maintenance alert: LoadBalancer in Cloud-Region-East scheduled for reboot due to Overheating detected.,TKT-5063,system_monitor_1@netops.com
+CMT-1064,Critical: Packet loss > 1% on Switch (POP-North). Immediate attention required.,TKT-5064,system_monitor_1@netops.com
+CMT-1065,Warning: PowerSupply at POP-North is reporting Overheating detected. Ticket auto-generated.,TKT-5065,system_monitor_4@netops.com
+CMT-1066,Maintenance alert: Firewall in DataCenter-A scheduled for reboot due to Packet loss > 1%.,TKT-5066,system_monitor_1@netops.com
+CMT-1067,Warning: Router at Cloud-Region-East is reporting Fan failure. Ticket auto-generated.,TKT-5067,system_monitor_2@netops.com
+CMT-1068,Critical: Interface flapping on Router (POP-South). Immediate attention required.,TKT-5068,system_monitor_5@netops.com
+CMT-1069,Maintenance alert: FiberLink in DataCenter-A scheduled for reboot due to Memory allocation failure.,TKT-5069,system_monitor_4@netops.com
+CMT-1070,Warning: Router at Cloud-Region-East is reporting BGP neighbor down. Ticket auto-generated.,TKT-5070,system_monitor_2@netops.com
+CMT-1071,Warning: FiberLink at POP-South is reporting CRC errors increasing. Ticket auto-generated.,TKT-5071,system_monitor_4@netops.com
+CMT-1072,Maintenance alert: Firewall in HQ-Basement scheduled for reboot due to BGP neighbor down.,TKT-5072,system_monitor_4@netops.com
+CMT-1073,Warning: PowerSupply at POP-North is reporting Interface flapping. Ticket auto-generated.,TKT-5073,system_monitor_4@netops.com
+CMT-1074,Warning: PowerSupply at Cloud-Region-East is reporting CRC errors increasing. Ticket auto-generated.,TKT-5074,system_monitor_4@netops.com
+CMT-1075,Maintenance alert: Firewall in Cloud-Region-East scheduled for reboot due to Interface flapping.,TKT-5075,system_monitor_3@netops.com
+CMT-1076,Critical: High latency observed on Firewall (HQ-Basement). Immediate attention required.,TKT-5076,system_monitor_4@netops.com
+CMT-1077,Warning: FiberLink at POP-South is reporting BGP neighbor down. Ticket auto-generated.,TKT-5077,system_monitor_1@netops.com
+CMT-1078,Maintenance alert: PowerSupply in DataCenter-A scheduled for reboot due to Interface flapping.,TKT-5078,system_monitor_3@netops.com
+CMT-1079,Warning: PowerSupply at POP-North is reporting Optical signal low. Ticket auto-generated.,TKT-5079,system_monitor_2@netops.com
+CMT-1080,Critical: Optical signal low on Switch (HQ-Basement). Immediate attention required.,TKT-5080,system_monitor_3@netops.com
+CMT-1081,Maintenance alert: FiberLink in DataCenter-A scheduled for reboot due to Fan failure.,TKT-5081,system_monitor_4@netops.com
+CMT-1082,Warning: Router at Cloud-Region-East is reporting High latency observed. Ticket auto-generated.,TKT-5082,system_monitor_2@netops.com
+CMT-1083,Warning: LoadBalancer at POP-South is reporting Packet loss > 1%. Ticket auto-generated.,TKT-5083,system_monitor_5@netops.com
+CMT-1084,Maintenance alert: Switch in DataCenter-A scheduled for reboot due to BGP neighbor down.,TKT-5084,system_monitor_4@netops.com
+CMT-1085,Warning: PowerSupply at POP-North is reporting CRC errors increasing. Ticket auto-generated.,TKT-5085,system_monitor_3@netops.com
+CMT-1086,Warning: PowerSupply at POP-North is reporting Packet loss > 1%. Ticket auto-generated.,TKT-5086,system_monitor_1@netops.com
+CMT-1087,Maintenance alert: Firewall in Cloud-Region-East scheduled for reboot due to Memory allocation failure.,TKT-5087,system_monitor_1@netops.com
+CMT-1088,Critical: Optical signal low on Switch (DataCenter-A). Immediate attention required.,TKT-5088,system_monitor_5@netops.com
+CMT-1089,Warning: LoadBalancer at POP-North is reporting High latency observed. Ticket auto-generated.,TKT-5089,system_monitor_4@netops.com
+CMT-1090,Maintenance alert: Switch in DataCenter-A scheduled for reboot due to CRC errors increasing.,TKT-5090,system_monitor_3@netops.com
+CMT-1091,Warning: LoadBalancer at DataCenter-A is reporting Fan failure. Ticket auto-generated.,TKT-5091,system_monitor_1@netops.com
+CMT-1092,Critical: Fan failure on PowerSupply (Cloud-Region-East). Immediate attention required.,TKT-5092,system_monitor_5@netops.com
+CMT-1093,Maintenance alert: PowerSupply in DataCenter-A scheduled for reboot due to Overheating detected.,TKT-5093,system_monitor_2@netops.com
+CMT-1094,Warning: LoadBalancer at HQ-Basement is reporting Memory allocation failure. Ticket auto-generated.,TKT-5094,system_monitor_1@netops.com
+CMT-1095,Warning: PowerSupply at Cloud-Region-East is reporting BGP neighbor down. Ticket auto-generated.,TKT-5095,system_monitor_5@netops.com
+CMT-1096,Maintenance alert: Switch in Cloud-Region-East scheduled for reboot due to CRC errors increasing.,TKT-5096,system_monitor_4@netops.com
+CMT-1097,Warning: PowerSupply at HQ-Basement is reporting Overheating detected. Ticket auto-generated.,TKT-5097,system_monitor_5@netops.com
+CMT-1098,Warning: PowerSupply at POP-South is reporting BGP neighbor down. Ticket auto-generated.,TKT-5098,system_monitor_4@netops.com
+CMT-1099,Maintenance alert: Switch in HQ-Basement scheduled for reboot due to Interface flapping.,TKT-5099,system_monitor_1@netops.com
+CMT-1100,Critical: OSPF state stuck on Firewall (POP-South). Immediate attention required.,TKT-5100,system_monitor_3@netops.com

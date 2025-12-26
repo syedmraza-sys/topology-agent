@@ -1,39 +1,172 @@
 from __future__ import annotations
 
+import json
 from typing import Any, Dict
 
+import structlog
+
 from .state_types import TopologyState
+from ..config import get_settings
+from ..llm.llm_factory import get_planner_chain
+
+logger = structlog.get_logger("planner_node")
+
+
+def _fallback_plan(state: TopologyState) -> Dict[str, Any]:
+    """
+    Fallback plan used when the LLM output is invalid or planning fails.
+
+    This preserves your original behavior: call all tools once.
+    """
+    user_input = state.get("user_input", "")
+
+    return {
+        "strategy": "fallback_simple",
+        "description": "Fallback: call all tools once and correlate results.",
+        "steps": [
+            {"id": "step_topology", "tool": "topology_tool", "params": {}},
+            {"id": "step_inventory", "tool": "inventory_tool", "params": {}},
+            {"id": "step_comments", "tool": "comment_tool", "params": {}},
+            {"id": "step_memory", "tool": "memory_tool", "params": {}},
+            {"id": "step_hierarchy", "tool": "hierarchy_tool", "params": {}},
+        ],
+        "metadata": {
+            "from_user_input": user_input,
+            "fallback_reason": "llm_planner_failed_or_invalid_json",
+        },
+    }
+
+
+def _parse_plan_from_llm_output(raw_text: str, state: TopologyState) -> Dict[str, Any]:
+    """
+    Parse the LLM output as JSON and validate basic structure.
+
+    If parsing or validation fails, return the fallback plan.
+    """
+    # Clean up potential markdown formatting (e.g. ```json ... ```)
+    cleaned_text = raw_text.strip()
+    if cleaned_text.startswith("```"):
+        # Remove opening ```json or ```
+        cleaned_text = cleaned_text.split("\n", 1)[-1]
+        # Remove closing ```
+        if cleaned_text.endswith("```"):
+            cleaned_text = cleaned_text.rsplit("\n", 1)[0]
+    
+    try:
+        data = json.loads(cleaned_text)
+    except Exception as exc:
+        logger.warning(
+            "planner_llm_json_parse_failed",
+            error=str(exc),
+            raw_text_snippet=raw_text[:200],
+        )
+        state["planning_error"] = f"JSON parse error: {exc}"
+        return _fallback_plan(state)
+
+    # Basic sanity checks
+    if not isinstance(data, dict) or "steps" not in data:
+        logger.warning(
+            "planner_llm_invalid_structure",
+            reason="missing_steps",
+        )
+        state["planning_error"] = "Planner LLM output missing 'steps'."
+        return _fallback_plan(state)
+
+    steps = data.get("steps", [])
+    if not isinstance(steps, list) or not steps:
+        logger.warning(
+            "planner_llm_invalid_structure",
+            reason="steps_not_list_or_empty",
+        )
+        state["planning_error"] = "Planner LLM 'steps' must be a non-empty list."
+        return _fallback_plan(state)
+
+    # Ensure each step has at least an id and tool
+    for idx, step in enumerate(steps):
+        if not isinstance(step, dict) or "tool" not in step:
+            logger.warning(
+                "planner_llm_invalid_step",
+                index=idx,
+                step=step,
+            )
+            state["planning_error"] = f"Invalid step at index {idx}."
+            return _fallback_plan(state)
+        step.setdefault("id", f"step_{idx}")
+        step.setdefault("params", {})
+
+    # If we get here, we consider the plan acceptable
+    return data
 
 
 async def planner_node(state: TopologyState) -> TopologyState:
     """
-    Planner node.
+    LLM-based planner node.
 
-    In the full implementation this will:
-      - Call an LLM (via llm.llm_factory) with a planner prompt
-      - Produce a structured plan (which tools to call, with what arguments, and in what order)
-      - Possibly include strategy flags (requires_strict_completeness, allow_partial, etc.)
-
-    For now, we stub a simple static plan that says:
-      - Call topology, inventory, comments, memory, hierarchy tools once.
+    - Calls the planner chain (prompt + model).
+    - Expects valid JSON in the response.
+    - On success: stores structured plan in state["plan"].
+    - On failure: stores a fallback plan and sets state["planning_error"].
     """
-    user_input = state.get("user_input", "")
+    settings = get_settings()
+    question = state.get("user_input", "") or ""
 
-    # Simple placeholder plan structure
-    plan: Dict[str, Any] = {
-        "strategy": "simple",
-        "description": "Call all tools once and correlate results.",
-        "steps": [
-            {"id": "step_topology", "tool": "topology_tool"},
-            {"id": "step_inventory", "tool": "inventory_tool"},
-            {"id": "step_comments", "tool": "comment_tool"},
-            {"id": "step_memory", "tool": "memory_tool"},
-            {"id": "step_hierarchy", "tool": "hierarchy_tool"},
-        ],
-        "metadata": {
-            "from_user_input": user_input,
-        },
+    ui_context = state.get("ui_context", {}) or {}
+    history = state.get("history", []) or []
+    memory_snippets = state.get("semantic_memory", []) or []
+    previous_plan = state.get("plan") or {}
+    validation_feedback = state.get("validation") or {}
+
+    if not question.strip():
+        # Degenerate case: no question; just use fallback plan.
+        logger.info("planner_empty_question_using_fallback")
+        state["plan"] = _fallback_plan(state)
+        state["plan_raw"] = ""
+        return state
+
+    planner_chain = get_planner_chain(settings)
+
+    # Build planner input (matches planner_prompt.py template)
+    planner_input: Dict[str, Any] = {
+        "question": question,
+        "ui_context": ui_context,
+        "history": history,
+        "memory_snippets": memory_snippets,
+        "previous_plan": previous_plan,
+        "validation_feedback": validation_feedback,
     }
 
+    logger.info("planner_llm_invoke_start")
+
+    try:
+        # planner_chain is (prompt | model). It will return a ChatMessage-like object.
+        result = await planner_chain.ainvoke(planner_input)  # type: ignore[attr-defined]
+    except Exception as exc:
+        logger.error("planner_llm_invoke_failed", error=str(exc), exc_info=True)
+        state["plan"] = _fallback_plan(state)
+        state["plan_raw"] = ""
+        state["planning_error"] = f"Planner LLM invoke error: {exc}"
+        return state
+
+    # Extract raw text from the model output
+    try:
+        raw_text = result.content if hasattr(result, "content") else str(result)
+    except Exception:
+        raw_text = str(result)
+
+    state["plan_raw"] = raw_text
+
+    plan = _parse_plan_from_llm_output(raw_text, state)
     state["plan"] = plan
+
+    print("DEBUG: state plan ", state["plan"])  
+    print("DEBUG: state plan_raw ", state["plan_raw"])  
+    print("DEBUG: state planning_error ", state["planning_error"])  
+    
+    logger.info(
+        "planner_llm_invoke_success",
+        strategy=plan.get("strategy", "unknown"),
+        num_steps=len(plan.get("steps", [])),
+        has_error=bool(state.get("planning_error")),
+    )
+
     return state

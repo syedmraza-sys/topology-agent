@@ -45,13 +45,13 @@ async def get_circuits_by_sites(
         .format(layer_clause="AND layer = :layer" if layer else "")
     )
 
-    print("LOG: Running SQL query:", query)
-    print("LOG: With params:", {
-        "src_site": src_site,
-        "dst_site": dst_site,
-        "layer": layer,
-        "limit": limit,
-    })
+    # print("LOG: Running SQL query:", query)
+    # print("LOG: With params:", {
+    #     "src_site": src_site,
+    #     "dst_site": dst_site,
+    #     "layer": layer,
+    #     "limit": limit,
+    # })
     
     params: Dict[str, Any] = {
         "src_site": src_site,

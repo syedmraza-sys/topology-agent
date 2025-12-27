@@ -1,0 +1,8 @@
+global:
+  scrape_interval: 30s
+
+scrape_configs:
+  - job_name: "topology-agent"
+    metrics_path: "/api/metrics"  # or "/metrics"
+    static_configs:
+      - targets: ["localhost:8000"]

@@ -56,6 +56,10 @@ class Settings(BaseSettings):
         "/api",
         description="Base prefix for API routes.",
     )
+    cors_allow_origins: list[str] = Field(
+        default=["*"],
+        description="List of allowed CORS origins.",
+    )
 
     # Database (inventory + chat + evals)
     database_url: str = Field(

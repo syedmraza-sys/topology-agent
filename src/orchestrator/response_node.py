@@ -20,6 +20,9 @@ async def response_node(state: TopologyState) -> TopologyState:
     """
     node_name = "response"
     log = logger.bind(node=node_name)
+    if "request_id" in state:
+        log = log.bind(request_id=state["request_id"])
+        
     start = time.perf_counter()
 
     try:

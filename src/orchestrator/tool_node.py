@@ -25,6 +25,9 @@ async def _run_tool_with_metrics(
     Helper to wrap each tool invocation with logging + Prometheus metrics.
     """
     log = logger.bind(tool=name)
+    if "request_id" in state:
+        log = log.bind(request_id=state["request_id"])
+
     start = time.perf_counter()
 
     try:
@@ -55,6 +58,9 @@ async def tool_node(state: TopologyState) -> TopologyState:
     """
     node_name = "tool_node"
     log = logger.bind(node=node_name)
+    if "request_id" in state:
+        log = log.bind(request_id=state["request_id"])
+
     start = time.perf_counter()
 
     try:

@@ -14,6 +14,7 @@ class TopologyState(TypedDict, total=False):
     user_input: str
     ui_context: Dict[str, Any]
     session_id: Optional[str]
+    request_id: Optional[str]  # Correlation ID for logging/tracing
 
     # Conversation context (can be populated by a memory node later)
     history: List[Dict[str, Any]]

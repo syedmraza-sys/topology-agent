@@ -10,6 +10,7 @@ from .state_types import TopologyState
 from .metrics import NODE_INVOCATIONS, NODE_LATENCY
 from ..config import get_settings
 from ..llm.llm_factory import get_planner_chain
+from .domain_metrics import PLANNER_FALLBACK_USED
 
 logger = structlog.get_logger("orchestrator.planner")
 
@@ -20,6 +21,8 @@ def _fallback_plan(state: TopologyState) -> Dict[str, Any]:
 
     This preserves your original behavior: call all tools once.
     """
+    PLANNER_FALLBACK_USED.inc()
+    
     user_input = state.get("user_input", "")
 
     return {
@@ -111,6 +114,10 @@ async def planner_node(state: TopologyState) -> TopologyState:
     
     node_name = "planner"
     log = logger.bind(node=node_name)
+    request_id = state.get("request_id")
+    if request_id:
+        log = log.bind(request_id=request_id)
+
     start = time.perf_counter()
     
     settings = get_settings()

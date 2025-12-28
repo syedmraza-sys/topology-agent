@@ -1,5 +1,5 @@
 import csv
-import random
+import random 
 
 # Define pools for random generation
 severities = ["High", "Medium", "Low", "Critical"]

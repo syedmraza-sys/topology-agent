@@ -7,6 +7,7 @@ import structlog
 
 from .state_types import TopologyState
 from .metrics import NODE_INVOCATIONS, NODE_LATENCY
+from .domain_metrics import COMMENT_RAG_HIT, COMMENT_RAG_MISS
 
 logger = structlog.get_logger("orchestrator.correlate")
 
@@ -33,6 +34,9 @@ async def correlate_and_validate_node(state: TopologyState) -> TopologyState:
 
     node_name = "correlate_validate"
     log = logger.bind(node=node_name)
+    if "request_id" in state:
+        log = log.bind(request_id=state["request_id"])
+        
     start = time.perf_counter()
 
     try:
@@ -47,7 +51,11 @@ async def correlate_and_validate_node(state: TopologyState) -> TopologyState:
         paths: List[Dict[str, Any]] = topology_data.get("paths", [])  # should match TopologyPath schema
         circuits: List[Dict[str, Any]] = inventory_data.get("circuits", [])
         comments: List[Dict[str, Any]] = comment_data.get("comments", []) or []
-
+        if comments:
+            COMMENT_RAG_HIT.inc()
+        else:
+            COMMENT_RAG_MISS.inc()
+        
         total_circuits = len(circuits)
         # For now, assume all fetched circuits are "impacted"; later you can
         # compute this based on outage state, path membership, etc.

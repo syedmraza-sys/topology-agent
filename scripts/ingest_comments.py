@@ -12,7 +12,7 @@ sys.path.append(os.getcwd())
 from src.config import get_settings
 from src.dependencies import init_resources, close_resources, get_session_maker
 from src.llm.llm_factory import get_comment_embedding_model
-from src.db import vector_client
+from src.db import vector_client 
 
 async def ingest_csv(file_path: str):
     print(f"Starting ingestion from {file_path}...")

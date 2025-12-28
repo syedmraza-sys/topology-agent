@@ -22,6 +22,9 @@ async def ingress_node(state: TopologyState) -> TopologyState:
     """
     node_name = "ingress"
     log = logger.bind(node=node_name)
+    if "request_id" in state:
+        log = log.bind(request_id=state["request_id"])
+
     start = time.perf_counter()
 
     try:

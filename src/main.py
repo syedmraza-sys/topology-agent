@@ -1,14 +1,17 @@
 from __future__ import annotations
 
 import time
+import uuid
 from contextlib import asynccontextmanager
+
+import structlog
 
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from . import __version__
 from .config import get_settings
-from .dependencies import close_resources, init_resources
+from .dependencies import close_resources, init_resources, get_logger
 from .api import chat, metrics, system, topology
 from .api.http_metrics import API_REQUESTS, API_REQUEST_DURATION
 
@@ -50,6 +53,36 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
+    # ------------------------------------------------------------------ #
+    # Request ID middleware (correlation IDs)
+    # ------------------------------------------------------------------ #
+    @app.middleware("http")
+    async def request_id_middleware(request: Request, call_next):
+        # Reuse header if present, otherwise generate one
+        request_id = request.headers.get("X-Request-ID") or str(uuid.uuid4())
+        # Attach it to the request state so handlers can access it
+        request.state.request_id = request_id
+
+        # Bind to structlog's context for this coroutine
+        logger = structlog.get_logger("http").bind(request_id=request_id)
+        logger.info(
+            "http_request_start",
+            method=request.method,
+            path=request.url.path,
+        )
+
+        try:
+            response = await call_next(request)
+        finally:
+            logger.info("http_request_end", path=request.url.path)
+
+        # Echo it back in the response headers
+        response.headers["X-Request-ID"] = request_id
+        return response
+
+    # ------------------------------------------------------------------ #
+    # HTTP metrics middleware (per-route Prometheus metrics)
+    # ------------------------------------------------------------------ #
     @app.middleware("http")
     async def http_metrics_middleware(request: Request, call_next):
         """
@@ -59,6 +92,7 @@ def create_app() -> FastAPI:
           - topology_api_requests_total{path,method,status}
           - topology_api_request_duration_seconds{path,method}
         """
+
         start = time.perf_counter()
         path = request.url.path
         method = request.method.upper()

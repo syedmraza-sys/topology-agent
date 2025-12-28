@@ -3,7 +3,7 @@ from __future__ import annotations
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import Field, HttpUrl
+from pydantic import AliasChoices, Field, HttpUrl
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -138,14 +138,17 @@ class Settings(BaseSettings):
     # Optional: LangSmith
     langsmith_api_key: str | None = Field(
         default=None,
+        validation_alias=AliasChoices("TOPOLOGY_AGENT_LANGSMITH_API_KEY", "LANGSMITH_API_KEY", "LANGCHAIN_API_KEY"),
         description="LangSmith API key (optional).",
     )
     langsmith_project: str | None = Field(
         default=None,
+        validation_alias=AliasChoices("TOPOLOGY_AGENT_LANGSMITH_PROJECT", "LANGSMITH_PROJECT", "LANGCHAIN_PROJECT"),
         description="LangSmith project name (optional).",
     )
     langsmith_endpoint: HttpUrl | None = Field(
         default=None,
+        validation_alias=AliasChoices("TOPOLOGY_AGENT_LANGSMITH_ENDPOINT", "LANGSMITH_ENDPOINT", "LANGCHAIN_ENDPOINT"),
         description="Custom LangSmith endpoint (optional).",
     )
 

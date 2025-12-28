@@ -47,6 +47,10 @@ async def init_resources() -> None:
     log = structlog.get_logger("startup")
     settings = get_settings()
 
+    # Configure LangSmith tracing if enabled
+    from .llm.tracing_langsmith import configure_langsmith_tracing
+    configure_langsmith_tracing(settings)
+
     log.info("initializing_resources", env=settings.env)
 
     # Database

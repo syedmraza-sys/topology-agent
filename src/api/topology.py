@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any, Dict, List, Optional
 from uuid import UUID, uuid4
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from pydantic import BaseModel, Field
 
 from ..config import Settings
@@ -12,6 +12,7 @@ from ..dependencies import (
     get_graph_app,
     get_settings_dep,
 )
+from ..orchestrator.domain_metrics import TOPOLOGY_QUERY_SUCCESS, TOPOLOGY_QUERY_FAILURE
 
 try:
     from langgraph.graph import CompiledGraph  # type: ignore
@@ -123,6 +124,7 @@ class TopologyResponse(BaseModel):
 )
 async def topology_query(
     payload: TopologyQueryRequest,
+    request: Request,
     settings: Settings = Depends(get_settings_dep),
     logger=Depends(get_context_logger),
     graph_app: CompiledGraph = Depends(get_graph_app),
@@ -134,37 +136,54 @@ async def topology_query(
     - Invokes the LangGraph graph.
     - Normalizes the result into TopologyResponse.
     """
-    request_id = uuid4()
-    logger = logger.bind(request_id=str(request_id))
+    # 1. Retrieve request_id from middleware (or gen new if missing)
+    if hasattr(request.state, "request_id"):
+        request_id = request.state.request_id
+    else:
+        # Fallback if middleware not active
+        request_id = str(uuid4())
 
+    logger = logger.bind(request_id=str(request_id))
     logger.info("topology_query_received", query=payload.query)
 
-    # Build initial state for the orchestrator.
-    # This structure should match your TopologyState definition in orchestrator/state_types.py.
+    # 2. Build initial state including request_id
     initial_state: Dict[str, Any] = {
         "user_input": payload.query,
         "ui_context": payload.ui_context.model_dump() if payload.ui_context else {},
         "session_id": str(payload.session_id) if payload.session_id else None,
-        "history": [],           # optionally populated by a memory node later
-        "semantic_memory": [],   # optionally populated by a memory node later
+        "request_id": str(request_id),
+        "history": [],
+        "semantic_memory": [],
         "retry_count": 0,
         "max_retries": 1,
     }
 
-    # Invoke the LangGraph graph; support both async and sync flavors.
+    # 3. Invoke LangGraph with metadata for LangSmith
+    config = {
+        "configurable": {"thread_id": str(payload.session_id) if payload.session_id else str(request_id)},
+        "metadata": {
+            "request_id": str(request_id),
+            "session_id": str(payload.session_id) if payload.session_id else None,
+            "source": "api",
+        },
+    }
+
     try:
         if hasattr(graph_app, "ainvoke"):
             print("LOG: Using async graph_app")
-            result_state = await graph_app.ainvoke(initial_state)  # type: ignore[attr-defined]
+            result_state = await graph_app.ainvoke(initial_state, config=config)  # type: ignore[attr-defined]
+            TOPOLOGY_QUERY_SUCCESS.inc()
         else:
             print("LOG: Using sync graph_app")
-            result_state = graph_app.invoke(initial_state)  # type: ignore[call-arg]
+            result_state = graph_app.invoke(initial_state, config=config)  # type: ignore[call-arg]
+            TOPOLOGY_QUERY_SUCCESS.inc()
     except Exception as exc:
         logger.error(
             "topology_query_failed",
             error=str(exc),
             exc_info=True,
         )
+        TOPOLOGY_QUERY_FAILURE.inc()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to process topology query.",

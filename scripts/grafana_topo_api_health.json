@@ -1,0 +1,133 @@
+{
+    "annotations": {
+        "list": [
+            {
+                "builtIn": 1,
+                "datasource": "-- Grafana --",
+                "enable": true,
+                "hide": true,
+                "iconColor": "rgba(0, 211, 255, 1)",
+                "name": "Annotations & Alerts",
+                "type": "dashboard"
+            }
+        ]
+    },
+    "editable": true,
+    "fiscalYearStartMonth": 0,
+    "graphTooltip": 0,
+    "id": null,
+    "links": [],
+    "liveNow": false,
+    "panels": [
+        {
+            "id": 1,
+            "title": "Topology /api/topology/query - Requests per second",
+            "type": "timeseries",
+            "datasource": null,
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 0
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "expr": "sum by (status) (rate(topology_api_requests_total{path=\"/api/topology/query\"}[5m]))",
+                    "legendFormat": "{{status}}",
+                    "intervalFactor": 1
+                }
+            ],
+            "options": {
+                "legend": {
+                    "displayMode": "table",
+                    "placement": "bottom"
+                },
+                "tooltip": {
+                    "mode": "single",
+                    "sort": "none"
+                }
+            }
+        },
+        {
+            "id": 2,
+            "title": "Topology /api/topology/query - Success vs Error Rate",
+            "type": "timeseries",
+            "datasource": null,
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 0
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "expr": "sum by (status) (rate(topology_api_requests_total{path=\"/api/topology/query\"}[5m]))",
+                    "legendFormat": "status={{status}}",
+                    "intervalFactor": 1
+                }
+            ],
+            "options": {
+                "legend": {
+                    "displayMode": "table",
+                    "placement": "bottom"
+                },
+                "tooltip": {
+                    "mode": "single",
+                    "sort": "none"
+                }
+            }
+        },
+        {
+            "id": 3,
+            "title": "Topology /api/topology/query - p95 Latency (seconds)",
+            "type": "timeseries",
+            "datasource": null,
+            "gridPos": {
+                "h": 8,
+                "w": 24,
+                "x": 0,
+                "y": 8
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "expr": "histogram_quantile(0.95, sum by (le) (rate(topology_api_request_duration_seconds_bucket{path=\"/api/topology/query\"}[5m])))",
+                    "legendFormat": "p95 latency",
+                    "intervalFactor": 1
+                }
+            ],
+            "options": {
+                "legend": {
+                    "displayMode": "list",
+                    "placement": "bottom"
+                },
+                "tooltip": {
+                    "mode": "single",
+                    "sort": "none"
+                }
+            }
+        }
+    ],
+    "refresh": "10s",
+    "schemaVersion": 38,
+    "style": "dark",
+    "tags": [
+        "topology-agent",
+        "api"
+    ],
+    "templating": {
+        "list": []
+    },
+    "time": {
+        "from": "now-15m",
+        "to": "now"
+    },
+    "timepicker": {},
+    "timezone": "",
+    "title": "Topology API Health",
+    "uid": "topology-api-health",
+    "version": 1,
+    "weekStart": ""
+}

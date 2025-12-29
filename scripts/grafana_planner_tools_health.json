@@ -1,0 +1,133 @@
+{
+    "annotations": {
+        "list": [
+            {
+                "builtIn": 1,
+                "datasource": "-- Grafana --",
+                "enable": true,
+                "hide": true,
+                "iconColor": "rgba(0, 211, 255, 1)",
+                "name": "Annotations & Alerts",
+                "type": "dashboard"
+            }
+        ]
+    },
+    "editable": true,
+    "fiscalYearStartMonth": 0,
+    "graphTooltip": 0,
+    "id": null,
+    "links": [],
+    "liveNow": false,
+    "panels": [
+        {
+            "id": 1,
+            "title": "Planner Node - p95 Latency (seconds)",
+            "type": "timeseries",
+            "datasource": null,
+            "gridPos": {
+                "h": 8,
+                "w": 24,
+                "x": 0,
+                "y": 0
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "expr": "histogram_quantile(0.95, sum by (le) (rate(topology_orchestrator_node_duration_seconds_bucket{node=\"planner\"}[5m])))",
+                    "legendFormat": "planner p95",
+                    "intervalFactor": 1
+                }
+            ],
+            "options": {
+                "legend": {
+                    "displayMode": "list",
+                    "placement": "bottom"
+                },
+                "tooltip": {
+                    "mode": "single",
+                    "sort": "none"
+                }
+            }
+        },
+        {
+            "id": 2,
+            "title": "Node Invocations by Status",
+            "type": "timeseries",
+            "datasource": null,
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 8
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "expr": "sum by (node, status) (rate(topology_orchestrator_node_invocations_total[5m]))",
+                    "legendFormat": "{{node}} ({{status}})",
+                    "intervalFactor": 1
+                }
+            ],
+            "options": {
+                "legend": {
+                    "displayMode": "table",
+                    "placement": "bottom"
+                },
+                "tooltip": {
+                    "mode": "single",
+                    "sort": "none"
+                }
+            }
+        },
+        {
+            "id": 3,
+            "title": "Tool Error Rate (errors/sec)",
+            "type": "timeseries",
+            "datasource": null,
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 8
+            },
+            "targets": [
+                {
+                    "refId": "A",
+                    "expr": "sum by (tool) (rate(topology_orchestrator_tool_invocations_total{status=\"error\"}[5m]))",
+                    "legendFormat": "{{tool}} errors",
+                    "intervalFactor": 1
+                }
+            ],
+            "options": {
+                "legend": {
+                    "displayMode": "table",
+                    "placement": "bottom"
+                },
+                "tooltip": {
+                    "mode": "single",
+                    "sort": "none"
+                }
+            }
+        }
+    ],
+    "refresh": "10s",
+    "schemaVersion": 38,
+    "style": "dark",
+    "tags": [
+        "topology-agent",
+        "orchestrator"
+    ],
+    "templating": {
+        "list": []
+    },
+    "time": {
+        "from": "now-15m",
+        "to": "now"
+    },
+    "timepicker": {},
+    "timezone": "",
+    "title": "Planner & Tools Health",
+    "uid": "planner-tools-health",
+    "version": 1,
+    "weekStart": ""
+}

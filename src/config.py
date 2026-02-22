@@ -103,7 +103,7 @@ class Settings(BaseSettings):
     #    description="Default LLM backend to use for Chat models.",
     #)
 
-    llm_backend: Literal["bedrock", "vertex", "openai", "vllm", "llamacpp"] = Field(
+    llm_backend: Literal["bedrock", "vertex", "openai", "vllm", "ollama"] = Field(
         default="openai",
         description="Which LLM backend to use for planner/response/validator.",
     )
@@ -113,25 +113,66 @@ class Settings(BaseSettings):
         description="Backend for embeddings. If None, uses llm_backend.",
     )
 
-    # llama.cpp / local GGUF models (e.g. mistral-7b-instruct-v0.2.Q4_K_M.gguf)
-    llama_model_path: str | None = Field(
+    # Budgets
+    global_llm_budget: float = Field(
+        100.0,
+        description="Global budget for LLM API costs.",
+    )
+    user_llm_budget: float = Field(
+        10.0,
+        description="Per-user budget for LLM API costs.",
+    )
+    fallback_backend: Literal["bedrock", "vertex", "openai", "vllm", "ollama"] = Field(
+        "ollama",
+        description="Backend to use when budget is exceeded.",
+    )
+
+    # Ollama models (e.g. mistral)
+    ollama_model: str = Field(
+        default="mistral",
+        description="Ollama model to use.",
+    )
+    ollama_base_url: str = Field(
+        default="http://localhost:11434",
+        description="Base URL for the Ollama service.",
+    )
+
+    # Optional tuning parameters for Ollama
+    ollama_num_ctx: int | None = Field(
         default=None,
-        description=(
-            "Path to local GGUF model file for llama.cpp, e.g. "
-            "/models/mistral-7b-instruct-v0.2.Q4_K_M.gguf"
-        ),
+        description="Context window size (num_ctx).",
     )
-    llama_n_ctx: int = Field(
-        default=4096,
-        description="Context window (n_ctx) for llama.cpp models.",
+    ollama_num_predict: int | None = Field(
+        default=None,
+        description="Maximum number of tokens to predict (num_predict).",
     )
-    llama_n_gpu_layers: int = Field(
-        default=0,
-        description="Number of layers to offload to GPU (-1 = all, 0 = CPU only).",
+    ollama_num_gpu: int | None = Field(
+        default=None,
+        description="Number of layers to offload to GPU.",
     )
-    llama_n_threads: int = Field(
-        default=4,
-        description="Number of CPU threads to use for llama.cpp.",
+    ollama_num_thread: int | None = Field(
+        default=None,
+        description="Number of CPU threads to use for Ollama.",
+    )
+    ollama_temperature: float | None = Field(
+        default=None,
+        description="Temperature for Ollama (overrides agent defaults).",
+    )
+    ollama_top_k: int | None = Field(
+        default=None,
+        description="Top-K sampling for Ollama.",
+    )
+    ollama_top_p: float | None = Field(
+        default=None,
+        description="Top-P sampling for Ollama.",
+    )
+    ollama_repeat_penalty: float | None = Field(
+        default=None,
+        description="Repeat penalty for Ollama.",
+    )
+    ollama_keep_alive: str | int | None = Field(
+        default=None,
+        description="Keep alive time for Ollama models (e.g. '5m', or -1).",
     )
 
 

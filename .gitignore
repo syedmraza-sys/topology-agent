@@ -16,3 +16,13 @@ __pycache__/
 
 # Enviromental variables
 .env
+.llm_call_logs.jsonl
+.llm_usage.json
+prompt_v1.txt
+.gitignore
+prompt_v2.txt
+prompt_v3.txt
+.gitignore
+prompt_v4.txt
+prompt_v5.txt
+start.sh

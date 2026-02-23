@@ -81,6 +81,11 @@ def get_planner_model(settings: Settings | None = None, user_id: str = "anonymou
             "agent_role": "planner",
             "user_id": user_id,
             "session_id": session_id
+        },
+        guardrail_config={
+            "json_enforcement": True,
+            "rbac_level": "none",
+            "pii_redaction": False, # Planner often needs IPs or coordinates, so skip broad PII scrubbing here
         }
     )
 
@@ -100,6 +105,11 @@ def get_validator_model(settings: Settings | None = None, user_id: str = "anonym
             "agent_role": "validator",
             "user_id": user_id,
             "session_id": session_id
+        },
+        guardrail_config={
+            "json_enforcement": True,
+            "rbac_level": "none",
+            "pii_redaction": False,
         }
     )
 
@@ -119,6 +129,11 @@ def get_response_model(settings: Settings | None = None, user_id: str = "anonymo
             "agent_role": "response",
             "user_id": user_id,
             "session_id": session_id
+        },
+        guardrail_config={
+            "json_enforcement": False,
+            "rbac_level": "none",
+            "pii_redaction": True, # Scrub outgoing responses to users
         }
     )
 

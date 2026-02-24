@@ -179,9 +179,9 @@ async def planner_node(state: TopologyState) -> TopologyState:
         plan = _parse_plan_from_llm_output(raw_text, state)
         state["plan"] = plan
 
-        print("DEBUG: state plan ", state["plan"])  
-        print("DEBUG: state plan_raw ", state["plan_raw"])  
-        print("DEBUG: state planning_error ", state["planning_error"])  
+        print("DEBUG: state plan ", state.get("plan"))  
+        print("DEBUG: state plan_raw ", state.get("plan_raw"))  
+        print("DEBUG: state planning_error ", state.get("planning_error"))  
     
         NODE_INVOCATIONS.labels(node=node_name, status="ok").inc()        
         

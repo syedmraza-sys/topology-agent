@@ -22,12 +22,22 @@ async def run_topology_tool(state: TopologyState) -> Dict[str, Any]:
     Adapt the Cypher query to your real graph schema later.
     """
     
-    # print("LOG: Inside topology_tool")
-    user_input = state.get("user_input", "")
-    ui_context: Dict[str, Any] = state.get("ui_context", {}) or {}
+    # Extract params from the scheduled plan step
+    plan = state.get("plan", {})
+    steps = plan.get("steps", [])
+    
+    params = {}
+    for step in steps:
+        if step.get("tool") == "topology_tool":
+            params = step.get("params", {})
+            break
 
-    selected_sites: List[str] = ui_context.get("selected_sites") or []
-    layer: str = ui_context.get("layer") or "L2"
+    ui_context: Dict[str, Any] = state.get("ui_context", {}) or {}
+    
+    selected_sites: List[str] = params.get("sites") or ui_context.get("selected_sites") or []
+    layer: str = params.get("layer") or ui_context.get("layer") or "L2"
+    depth: int = params.get("depth") or 5
+    query_type: str = params.get("query_type") or "path"
 
     # print("LOG: Selected sites:", selected_sites)
     # print("LOG: Layer:", layer) 
@@ -42,7 +52,7 @@ async def run_topology_tool(state: TopologyState) -> Dict[str, Any]:
             "metadata": {
                 "source": "topology_tool_stub",
                 "reason": "graph_client not configured or insufficient selected_sites",
-                "query_summary": f"Stub topology result for: {user_input}",
+                "query_summary": f"Stub topology result for: {selected_sites}",
             },
         }
 

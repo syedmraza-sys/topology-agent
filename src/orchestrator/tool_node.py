@@ -12,6 +12,7 @@ from .inventory_tool import run_inventory_tool
 from .comment_tool import run_comment_tool
 from .memory_tool import run_memory_tool
 from .hierarchy_tool import run_hierarchy_tool
+from .outage_tool import run_outage_tool
 
 logger = structlog.get_logger("orchestrator.tools")
 
@@ -66,40 +67,40 @@ async def tool_node(state: TopologyState) -> TopologyState:
     try:
         log.info("node_start")
 
-        # Topology graph
-        state["topology_data"] = await _run_tool_with_metrics(
-            "topology_tool",
-            run_topology_tool,
-            state,
-        )
+        plan = state.get("plan", {})
+        steps = plan.get("steps", [])
 
-        # Inventory DB
-        state["inventory_data"] = await _run_tool_with_metrics(
-            "inventory_tool",
-            run_inventory_tool,
-            state,
-        )
+        # If we have no plan or it's empty, default to calling them all
+        # or just iterating over them (fallback_plan handles empty logic).
+        tool_dispatch = {
+            "topology_tool": (run_topology_tool, "topology_data"),
+            "inventory_tool": (run_inventory_tool, "inventory_data"),
+            "comment_tool": (run_comment_tool, "comment_data"),
+            "comments_search_tool": (run_comment_tool, "comment_data"),
+            "outage_tool": (run_outage_tool, "outage_data"),
+            "memory_tool": (run_memory_tool, "memory_data"),
+            "hierarchy_tool": (run_hierarchy_tool, "hierarchy_data"),
+        }
 
-        # Comment RAG / pgvector
-        state["comment_data"] = await _run_tool_with_metrics(
-            "comment_tool",
-            run_comment_tool,
-            state,
-        )
+        # Initialize state keys to None so downstream nodes don't KeyError
+        for _, data_key in tool_dispatch.values():
+            state[data_key] = None
 
-        # Long-term memory RAG (if implemented)
-        state["memory_data"] = await _run_tool_with_metrics(
-            "memory_tool",
-            run_memory_tool,
-            state,
-        )
-
-        # Low-latency hierarchy API
-        state["hierarchy_data"] = await _run_tool_with_metrics(
-            "hierarchy_tool",
-            run_hierarchy_tool,
-            state,
-        )
+        if not steps:
+            logger.warning("tool_node_no_steps", plan=plan)
+            # You can choose to fallback to calling them all here if preferred.
+            
+        for step in steps:
+            tool_name = step.get("tool")
+            if tool_name in tool_dispatch:
+                func, data_key = tool_dispatch[tool_name]
+                state[data_key] = await _run_tool_with_metrics(
+                    tool_name,
+                    func,
+                    state,
+                )
+            else:
+                logger.warning("tool_node_unknown_tool", tool_name=tool_name)
 
         NODE_INVOCATIONS.labels(node=node_name, status="ok").inc()
         return state

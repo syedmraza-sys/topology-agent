@@ -42,19 +42,22 @@ async def correlate_and_validate_node(state: TopologyState) -> TopologyState:
     try:
         log.info("node_start")
 
-        topology_data: Dict[str, Any] = state.get("topology_data", {}) or {}
-        inventory_data: Dict[str, Any] = state.get("inventory_data", {}) or {}
-        comment_data: Dict[str, Any] = state.get("comment_data", {}) or {}
-        hierarchy_data: Dict[str, Any] = state.get("hierarchy_data", {}) or {}
+        topology_data: Dict[str, Any] = state.get("topology_data") or {}
+        inventory_data: Dict[str, Any] = state.get("inventory_data") or {}
+        comment_data: Dict[str, Any] = state.get("comment_data") or {}
+        hierarchy_data: Dict[str, Any] = state.get("hierarchy_data") or {}
+        outage_data: Dict[str, Any] = state.get("outage_data") or {}
 
         # Very simple stub correlation:
         paths: List[Dict[str, Any]] = topology_data.get("paths", [])  # should match TopologyPath schema
         circuits: List[Dict[str, Any]] = inventory_data.get("circuits", [])
-        comments: List[Dict[str, Any]] = comment_data.get("comments", []) or []
-        if comments:
-            COMMENT_RAG_HIT.inc()
-        else:
-            COMMENT_RAG_MISS.inc()
+        comments: List[Dict[str, Any]] = comment_data.get("comments", [])
+        
+        if comment_data:
+            if comments:
+                COMMENT_RAG_HIT.inc()
+            else:
+                COMMENT_RAG_MISS.inc()
         
         total_circuits = len(circuits)
         # For now, assume all fetched circuits are "impacted"; later you can

@@ -103,9 +103,11 @@ async def init_resources() -> None:
     # LangGraph graph: import lazily to avoid circular imports
     try:
         from .orchestrator.workflow import build_workflow  # type: ignore
+        from langgraph.checkpoint.memory import MemorySaver
 
-        _graph_app = build_workflow()
-        log.info("graph_app_initialized")
+        checkpointer = MemorySaver()
+        _graph_app = build_workflow(checkpointer=checkpointer)
+        log.info("graph_app_initialized", checkpointer="MemorySaver")
     except Exception as exc:  # pragma: no cover - orchestrator may not exist yet
         _graph_app = None
         log.warning(

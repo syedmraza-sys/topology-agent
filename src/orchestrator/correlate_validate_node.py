@@ -48,63 +48,124 @@ async def correlate_and_validate_node(state: TopologyState) -> TopologyState:
         hierarchy_data: Dict[str, Any] = state.get("hierarchy_data") or {}
         outage_data: Dict[str, Any] = state.get("outage_data") or {}
 
-        # Very simple stub correlation:
-        paths: List[Dict[str, Any]] = topology_data.get("paths", [])  # should match TopologyPath schema
+        # 1. Map Alarms for efficient lookup
+        # outage_tool returns { "active_alarms": [...] }
+        alarms = outage_data.get("active_alarms", [])
+        alarms_by_eid: Dict[str, List[Dict[str, Any]]] = {}
+        for alarm in alarms:
+            eid = alarm.get("element_id")
+            if eid:
+                alarms_by_eid.setdefault(eid, []).append(alarm)
+
+        # 2. Enrich Circuits with Alarm Data
         circuits: List[Dict[str, Any]] = inventory_data.get("circuits", [])
-        comments: List[Dict[str, Any]] = comment_data.get("comments", [])
+        impacted_circuits_count = 0
         
+        for circuit in circuits:
+            cid = circuit.get("circuit_id")
+            # Attach direct alarms for this circuit
+            circuit_alarms = alarms_by_eid.get(cid, [])
+            
+            # (Heuristic) Also check if the sites it connects might have alarms
+            # Logic depends on inventory schema; assuming src_site/dst_site keys
+            src_site = circuit.get("src_site")
+            dst_site = circuit.get("dst_site")
+            if src_site in alarms_by_eid:
+                circuit_alarms.extend(alarms_by_eid[src_site])
+            if dst_site in alarms_by_eid:
+                circuit_alarms.extend(alarms_by_eid[dst_site])
+
+            circuit["alarms"] = circuit_alarms
+            circuit["is_impacted"] = len(circuit_alarms) > 0
+            if circuit["is_impacted"]:
+                impacted_circuits_count += 1
+
+        # 3. Enrich Topology Paths with Alarm Data
+        paths: List[Dict[str, Any]] = topology_data.get("paths", [])
+        for path in paths:
+            path_alarms = []
+            # 'hops' are IDs of sites or devices in the path
+            for hop_id in path.get("hops", []):
+                if hop_id in alarms_by_eid:
+                    path_alarms.extend(alarms_by_eid[hop_id])
+            
+            path["alarms"] = path_alarms
+            path["is_impacted"] = len(path_alarms) > 0
+
+        # 4. Handle Comment RAG metrics
+        comments: List[Dict[str, Any]] = comment_data.get("comments", [])
         if comment_data:
             if comments:
                 COMMENT_RAG_HIT.inc()
             else:
                 COMMENT_RAG_MISS.inc()
-        
-        total_circuits = len(circuits)
-        # For now, assume all fetched circuits are "impacted"; later you can
-        # compute this based on outage state, path membership, etc.
-        impacted_circuits = total_circuits
 
-        summary = {
-            "total_circuits": total_circuits,
-            "impacted_circuits": impacted_circuits,
-            "impacted_customers": 0,  # TODO: compute from hierarchy/inventory
-            "notes": "Summary derived from topology, inventory, and comment RAG; impact logic is placeholder.",
-        }
-
+        # 5. Global Summary and Warnings
         warnings: List[str] = []
         partial = False
 
-        # Basic validation stub
+        # Detect if any tool was skipped by circuit breaker
+        tool_results = [
+            ("topology", topology_data),
+            ("inventory", inventory_data),
+            ("outage", outage_data),
+            ("comments", comment_data)
+        ]
+        for t_name, t_data in tool_results:
+            if t_data.get("error") == "circuit_breaker_open":
+                warnings.append(f"Tool '{t_name}' was skipped due to recurring failures (circuit breaker open).")
+                partial = True
+
+        total_circuits = len(circuits)
+        
+        summary = {
+            "total_circuits": total_circuits,
+            "impacted_circuits": impacted_circuits_count,
+            "impacted_customers": 0, # TODO: integrate hierarchy_data when schema is ready
+            "notes": "Correlation complete. Alarms merged into circuits and topology paths.",
+        }
+
+        # 6. Validation Logic (Determine if Refinement is needed)
+        # If user asked a question but we have ZERO data and no errors, maybe we need to refine.
+        needs_refinement = False
+        if not paths and not circuits and not partial:
+             # Basic heuristic: if we found nothing, maybe the planner needs a broader search?
+             # But for now, let's keep it False to avoid loops.
+             pass
+
         validation: Dict[str, Any] = {
-            "status": "ok",
-            "needs_refinement": False,
-            "warnings": warnings.copy(),
+            "status": "partial" if partial else "ok",
+            "needs_refinement": needs_refinement,
+            "warnings": warnings,
         }
 
         state["validation"] = validation
+        state["partial"] = partial
 
-        # Prepare a draft ui_response structure; response_node can refine it further.
+        # 7. Final UI Response Preparation
         ui_response: Dict[str, Any] = {
-            "view_type": "path_view",
+            "view_type": "path_view" if paths else "circuit_view",
             "summary": summary,
             "paths": paths,
             "circuits": circuits,
-            "comments": comments,  # <- expose comment RAG results to UI
+            "comments": comments,
             "warnings": warnings,
             "partial": partial,
-            "natural_language_summary": "This is a placeholder summary for the topology query.",
-            "debug_state": {},
+            "natural_language_summary": f"Found {total_circuits} circuits, {impacted_circuits_count} of which are impacted by active outages.",
+            "debug_state": {
+                "num_alarms": len(alarms),
+                "num_hops_checked": sum(len(p.get("hops", [])) for p in paths)
+            },
         }
 
         state["ui_response"] = ui_response
-        state["partial"] = partial
 
         NODE_INVOCATIONS.labels(node=node_name, status="ok").inc()
         log.info(
             "node_completed",
             total_circuits=total_circuits,
-            num_paths=len(paths),
-            num_comments=len(comments),
+            affected=impacted_circuits_count,
+            partial=partial
         )
 
         return state

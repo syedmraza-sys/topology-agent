@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import time
+import logging
 from typing import Any, Dict, Callable, Awaitable
 
 import structlog
@@ -13,6 +14,17 @@ from .comment_tool import run_comment_tool
 from .memory_tool import run_memory_tool
 from .hierarchy_tool import run_hierarchy_tool
 from .outage_tool import run_outage_tool
+from .circuit_breaker import tool_circuit_breaker
+from ..config import get_settings
+
+import tenacity
+from tenacity import (
+    retry,
+    stop_after_attempt,
+    wait_exponential,
+    retry_if_exception_type,
+    before_sleep_log,
+)
 
 logger = structlog.get_logger("orchestrator.tools")
 
@@ -23,22 +35,56 @@ async def _run_tool_with_metrics(
     state: TopologyState,
 ) -> Dict[str, Any]:
     """
-    Helper to wrap each tool invocation with logging + Prometheus metrics.
+    Helper to wrap each tool invocation with logging + Prometheus metrics,
+    and resilience through retries.
     """
+    settings = get_settings()
     log = logger.bind(tool=name)
     if "request_id" in state:
         log = log.bind(request_id=state["request_id"])
 
     start = time.perf_counter()
 
+    # 1. Check Circuit Breaker
+    if tool_circuit_breaker.is_open(name):
+        log.warning("tool_circuit_open_skipping")
+        # Return a structure indicating it was skipped; 
+        # downstream correlate node should handle None or error fields.
+        return {"error": "circuit_breaker_open", "tool": name}
+
+    # Define the retry logic internally so it can access settings
+    @retry(
+        stop=stop_after_attempt(settings.tool_retry_max_attempts),
+        wait=wait_exponential(
+            multiplier=settings.tool_retry_min_wait,
+            max=settings.tool_retry_max_wait
+        ),
+        retry=retry_if_exception_type(Exception), # In prod, maybe specific network errors
+        before_sleep=before_sleep_log(log, logging.WARNING),
+        reraise=True,
+    )
+    async def _invoke():
+        return await func(state)
+
     try:
         log.info("tool_start")
-        result = await func(state)
+        # Ensure breaker is configured with current settings
+        tool_circuit_breaker.failure_threshold = settings.tool_circuit_failure_threshold
+        tool_circuit_breaker.recovery_timeout = settings.tool_circuit_recovery_timeout
+
+        result = await _invoke()
+        
+        # 2. Record Success
+        tool_circuit_breaker.record_success(name)
+        
         TOOL_INVOCATIONS.labels(tool=name, status="ok").inc()
         return result
     except Exception as exc:  # pragma: no cover
+        # 3. Record Failure
+        tool_circuit_breaker.record_failure(name)
+        
         TOOL_INVOCATIONS.labels(tool=name, status="error").inc()
-        log.exception("tool_error", error=str(exc))
+        log.exception("tool_error_after_retries", error=str(exc))
         raise
     finally:
         duration = time.perf_counter() - start

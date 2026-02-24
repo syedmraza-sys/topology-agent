@@ -175,6 +175,36 @@ class Settings(BaseSettings):
         description="Keep alive time for Ollama models (e.g. '5m', or -1).",
     )
 
+    # Resilience
+    tool_retry_max_attempts: int = Field(
+        3,
+        description="Maximum number of retry attempts for tools.",
+    )
+    tool_retry_min_wait: float = Field(
+        1.0,
+        description="Minimum wait time between tool retries (seconds).",
+    )
+    tool_retry_max_wait: float = Field(
+        10.0,
+        description="Maximum wait time between tool retries (seconds).",
+    )
+
+    # LLM Retries
+    llm_retry_max_attempts: int = Field(
+        3,
+        description="Maximum number of retry attempts for LLM calls.",
+    )
+
+    # Circuit Breaker
+    tool_circuit_failure_threshold: int = Field(
+        5,
+        description="Number of failures before tripping tool circuit breaker.",
+    )
+    tool_circuit_recovery_timeout: int = Field(
+        60,
+        description="Timeout (seconds) before trying a tripped tool again.",
+    )
+
 
     # Optional: LangSmith
     langsmith_api_key: str | None = Field(

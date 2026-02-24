@@ -36,6 +36,7 @@ class TopologyState(TypedDict, total=False):
     comment_data: Dict[str, Any]
     memory_data: Dict[str, Any]
     hierarchy_data: Dict[str, Any]
+    outage_data: Dict[str, Any]
 
     # === Validation / correlation ===
     validation: Dict[str, Any]

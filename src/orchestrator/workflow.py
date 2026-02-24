@@ -11,7 +11,7 @@ from .response_node import response_node
 from .routers import refinement_router
 
 
-def build_workflow():
+def build_workflow(checkpointer=None):
     """
     Build and compile the LangGraph workflow for the topology agent.
 
@@ -60,4 +60,4 @@ def build_workflow():
     # Final edge
     workflow.add_edge("response_node", END)
 
-    return workflow.compile()
+    return workflow.compile(checkpointer=checkpointer)

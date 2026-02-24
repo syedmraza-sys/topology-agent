@@ -107,7 +107,13 @@ class GatewayClient:
         # 3. Model Generation
         raw_model = cls._create_model_from_tier(backend, tier, settings, temperature)
         
-        # 4. Instrumentation (Inject Usage Tracking Callback)
+        # 4. Resilience (Add LLM Retries)
+        if hasattr(raw_model, "with_retry"):
+            raw_model = raw_model.with_retry(
+                stop_after_attempt=settings.llm_retry_max_attempts
+            )
+
+        # 5. Instrumentation (Inject Usage Tracking Callback)
         callback = UsageTrackingCallbackHandler(storage=usage_store, user_id=user_id, agent_role=agent_role)
         bound_model = raw_model.with_config({"callbacks": [callback], "tags": [tier, user_id]})
         

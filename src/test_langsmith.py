@@ -8,7 +8,7 @@ prompt = ChatPromptTemplate.from_messages(
 model = ChatGoogleGenerativeAI(
     model="gemini-2.5-flash",   # or another Gemini model
     temperature=0.2,
-    api_key="AIzaSyAN84qSqGPxO6jK6Kj9SvqxUZvEqtg73Yk",
+    api_key="[ENCRYPTION_KEY]"
 )
 
 chain = prompt | model
